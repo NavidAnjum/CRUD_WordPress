@@ -1,38 +1,23 @@
-<style>
-    form {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        max-width: 800px;
-        margin: 0 auto;
-    }
-
-    label, input {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    @media only screen and (min-width: 768px) {
-        label, input {
-            width: 100%;
-        }
-    }
-
-    @media only screen and (min-width: 1024px) {
-        label, input {
-            width: 100%;
-        }
-    }
-</style>
-    <?php
+<?php
+    /*
+    Plugin Name: Basic CRUD Plugin
+    Plugin URI: https://laravelaura.com/
+    Description: A basic CRUD plugin for WordPress
+    Version: 1.0.0
+    Author: Navid
+    Author URI: https://laravalaura.com/
+    License: GPL2
+    */
 		if ( ! function_exists( 'wp_redirect' ) ) {
 			require_once ABSPATH . 'wp-includes/pluggable.php';
 		}
 
-		function create_contacts_table() {
+	function create_contacts_table()
+	{
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'contacts';
+		$charset_collate = $wpdb->get_charset_collate();
 
 		$sql = "CREATE TABLE $table_name (
         id INT(11) NOT NULL AUTO_INCREMENT,
@@ -52,10 +37,11 @@
 		dbDelta($sql);
 	}
 
-	register_activation_hook( __FILE__, 'create_contacts_table' );
+	register_activation_hook(__FILE__, 'create_contacts_table');
 
 
-	function contacts_form() {
+	function contacts_form()
+	{
 		global $wpdb;
 
 		if (isset($_POST['contact_id']) && !isset($_POST['update_contact'])) {
@@ -63,7 +49,7 @@
 			$table_name = $wpdb->prefix . 'contacts';
 			$result = $wpdb->get_row("SELECT * FROM $table_name WHERE id = $contact_id");
 			?>
-            <form method="post" enctype="multipart/form-data">
+            <form class="custom_form" method="post" enctype="multipart/form-data">
                 <h1 style="text-align: center">Update Contact</h1>
                 <label for="first_name">First Name:</label>
                 <input type="text" name="first_name" value="<?php echo $result->first_name; ?>" required><br>
@@ -81,9 +67,9 @@
                 <input type="date" id="date_of_birth" name="date_of_birth" value="<?php echo $result->date_of_birth; ?>" required><br>
 
                 <label for="user_image">User Image:</label>
-				<?php if ( $result->user_image ) : ?>
-                    <img style="width: 50px" src="<?php echo esc_attr( $result->user_image ); ?>" alt="<?php echo esc_attr( $result->first_name . ' ' . $result->last_name ); ?>">
-				<?php else: ?>
+				<?php if ($result->user_image) : ?>
+                    <img style="width: 50px" src="<?php echo esc_attr($result->user_image); ?>" alt="<?php echo esc_attr($result->first_name . ' ' . $result->last_name); ?>">
+				<?php else : ?>
                     <span>No image available</span>
 				<?php endif; ?>
 
@@ -93,9 +79,7 @@
                 <input type="submit" name="update_contact" value="Update">
             </form>
 
-			<?php
-
-		}else if(isset($_POST['update_contact'])) {
+		<?php } elseif (isset($_POST['update_contact'])) {
 			// get the contact ID from the hidden input field
 			$contact_id = $_POST['contact_id'];
 
@@ -176,15 +160,9 @@
 					'%d' // ID is an integer, so use '%d'
 				)
 			);
-
-			//wp_redirect( admin_url( '/admin.php?page=contacts_list' ) );
-			wp_redirect( admin_url( '/admin.php?page=contacts_list' ) );
+			//wp_redirect(admin_url('/admin.php?page=contacts_list'));
 			exit;
-		}
-
-
-
-		else if (isset($_POST['submit'])) {
+		} elseif (isset($_POST['submit'])) {
 			$table_name = $wpdb->prefix . 'contacts';
 
 			$first_name = $_POST['first_name'];
@@ -249,11 +227,10 @@
 					'%s'
 				)
 			);
+		} else {
+			?>
 
-		}else{
-		    ?>
-
-            <form method="post" enctype="multipart/form-data">
+            <form class="custom_form" method="post" enctype="multipart/form-data">
                 <h1 style="text-align: center">
                     Create Contacts
                 </h1>
@@ -281,108 +258,108 @@
                 <input type="submit" name="submit" value="Submit">
             </form>
 
-            <?php
-        }
-
+			<?php
+		}
 	}
 
-	function contacts_list() {
+	function contacts_list()
+	{
 		global $wpdb;
 
 		$table_name = $wpdb->prefix . 'contacts';
 
 		// Get total number of contacts
-		$total = $wpdb->get_var( "SELECT COUNT(*) FROM $table_name" );
+		$total = $wpdb->get_var("SELECT COUNT(*) FROM $table_name");
 
 		// Set the number of contacts to display per page
 		$per_page = 10;
 
 		// Get the current page number
-		$current_page = isset( $_GET['paged'] ) ? absint( $_GET['paged'] ) : 1;
+		$current_page = isset($_GET['paged']) ? absint($_GET['paged']) : 1;
 
 		// Calculate the offset
 		$offset = ( $current_page - 1 ) * $per_page;
 
 		// Retrieve the contacts from the database with pagination
-		$results = $wpdb->get_results( "SELECT * FROM $table_name ORDER BY id DESC LIMIT $per_page OFFSET $offset" );
+		$results = $wpdb->get_results("SELECT * FROM $table_name ORDER BY id DESC LIMIT $per_page OFFSET $offset");
 
 		// Output the contact list
 		?>
-		<div class="wrap">
-			<h1>Contacts</h1>
-			<table class="wp-list-table widefat striped">
-				<thead>
-				<tr>
-					<th scope="col">ID</th>
-					<th scope="col">First Name</th>
-					<th scope="col">Last Name</th>
-					<th scope="col">Email</th>
-					<th scope="col">Mobile</th>
-					<th scope="col">Date of Birth</th>
-					<th scope="col">User Image</th>
-					<th scope="col">Age</th>
+        <div class="wrap">
+            <h1>Contacts</h1>
+            <table class="wp-list-table widefat striped">
+                <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Mobile</th>
+                    <th scope="col">Date of Birth</th>
+                    <th scope="col">User Image</th>
+                    <th scope="col">Age</th>
                     <th scope="col">Action</th>
 
                 </tr>
-				</thead>
-				<tbody>
-				<?php foreach ( $results as $result ) : ?>
-					<tr>
-						<td><?php echo $result->id; ?></td>
-						<td><?php echo $result->first_name; ?></td>
-						<td><?php echo $result->last_name; ?></td>
-						<td><?php echo $result->email; ?></td>
-						<td><?php echo $result->mobile; ?></td>
-						<td><?php echo $result->date_of_birth; ?></td>
-						<td>
-							<?php if ( $result->user_image ) : ?>
-								<img style="width: 50px" src="<?php echo esc_attr( $result->user_image ); ?>" alt="<?php echo esc_attr( $result->first_name . ' ' . $result->last_name ); ?>">
-							<?php else: ?>
-								<span>No image available</span>
-							<?php endif; ?>
-						</td>
-						<td><?php echo $result->age; ?></td>
+                </thead>
+                <tbody>
+				<?php foreach ($results as $result) : ?>
+                    <tr>
+                        <td><?php echo $result->id; ?></td>
+                        <td><?php echo $result->first_name; ?></td>
+                        <td><?php echo $result->last_name; ?></td>
+                        <td><?php echo $result->email; ?></td>
+                        <td><?php echo $result->mobile; ?></td>
+                        <td><?php echo $result->date_of_birth; ?></td>
                         <td>
-                            <form method="post" action="<?php echo admin_url('admin.php?page=contacts'); ?>">
+							<?php if ($result->user_image) : ?>
+                                <img style="width: 50px" src="<?php echo esc_attr($result->user_image); ?>" alt="<?php echo esc_attr($result->first_name . ' ' . $result->last_name); ?>">
+							<?php else : ?>
+                                <span>No image available</span>
+							<?php endif; ?>
+                        </td>
+                        <td><?php echo $result->age; ?></td>
+                        <td>
+                            <form class="custom_form" method="post" action="<?php echo admin_url('admin.php?page=contacts'); ?>">
                                 <input type="hidden" name="contact_id" value="<?php echo $result->id; ?>">
                                 <button type="submit" name="edit_contact" class="button-link">Edit</button>
                             </form>
 
 
 
-                        <form method="post">
+                            <form class="custom_form" method="post">
                                 <input type="hidden" name="contact_id" value="<?php echo $result->id; ?>">
                                 <button type="submit" name="delete_contact" class="button-link" onclick="return confirm('Are you sure you want to delete this contact?')">Delete</button>
-                         </form>
+                            </form>
 
                         </td>
 
                     </tr>
 				<?php endforeach; ?>
-				</tbody>
-			</table>
-		</div>
+                </tbody>
+            </table>
+        </div>
 		<?php
 	}
 
-		// Function to handle delete contact request
-		if ( isset( $_POST['delete_contact'] ) ) {
+	// Function to handle delete contact request
+	if (isset($_POST['delete_contact'])) {
+		$table_name = $wpdb->prefix . 'contacts';
 
-			$table_name = $wpdb->prefix . 'contacts';
+		// Get the contact ID from the form submission
+		$contact_id = absint($_POST['contact_id']);
 
-			// Get the contact ID from the form submission
-			$contact_id = absint( $_POST['contact_id'] );
+		// Delete the contact from the database
+		$wpdb->delete($table_name, array( 'id' => $contact_id ));
 
-			// Delete the contact from the database
-			$wpdb->delete( $table_name, array( 'id' => $contact_id ) );
-
-			// Redirect back to the contacts list page
-			wp_redirect( admin_url( '/admin.php?page=contacts_list' ) );
-			exit;
-		}
+		// Redirect back to the contacts list page
+		wp_redirect(admin_url('/admin.php?page=contacts_list'));
+		exit;
+	}
 
 
-		function contacts_menu() {
+	function contacts_menu()
+	{
 		add_menu_page(
 			'Contacts', // page title
 			'Contacts', // menu title
@@ -398,20 +375,28 @@
 			'contacts_list', // menu slug
 			'contacts_list' // function to display the list
 		);
+	}
 
-		}
-
-
-
-		// create the contacts table on plugin activation
-	register_activation_hook( __FILE__, 'create_contacts_table' );
-
-// add the contacts menu to the WordPress admin menu
-	add_action( 'admin_menu', 'contacts_menu' );
-
-	?>
+	// add the contacts menu to the WordPress admin menu
+	add_action('admin_menu', 'contacts_menu');
 
 
+	add_action('admin_enqueue_scripts', 'my_custom_fonts'); // admin_head is a hook my_custom_fonts is a function we are adding it to the hook
 
+	function my_custom_fonts() {
+		echo '<style>
 
+   .custom_form.form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    max-width: 600px;
+    margin: 0 auto;
+}
 
+label, input {
+    width: 100%;
+    margin-bottom: 10px;
+}  
+  </style>';
+	}
